@@ -52,9 +52,13 @@ async def broadcast_system_stats():
                     session.refresh(tamagotchi)
                     
                     # Broadcast to all connected clients
+                    # Convert stats to dict with ISO timestamp
+                    stats_dict = stats.model_dump()
+                    stats_dict["timestamp"] = stats.timestamp.isoformat()
+                    
                     message = {
                         "type": "stats_update",
-                        "stats": stats.model_dump(),
+                        "stats": stats_dict,
                         "tamagotchi": {
                             "name": tamagotchi.name,
                             "level": tamagotchi.level,
@@ -191,9 +195,13 @@ async def websocket_endpoint(websocket: WebSocket):
                 session.commit()
                 session.refresh(tamagotchi)
                 
+                # Convert stats to dict with ISO timestamp
+                stats_dict = stats.model_dump()
+                stats_dict["timestamp"] = stats.timestamp.isoformat()
+                
                 initial_message = {
                     "type": "stats_update",
-                    "stats": stats.model_dump(),
+                    "stats": stats_dict,
                     "tamagotchi": {
                         "name": tamagotchi.name,
                         "level": tamagotchi.level,

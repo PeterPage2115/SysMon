@@ -50,6 +50,12 @@ if socket_path.exists():
 # 7. Test Docker SDK
 print(f"\n7. Docker SDK test:")
 try:
+    # CRITICAL: Import requests-unixsocket BEFORE docker SDK
+    # This registers the Unix socket adapter with requests library
+    import requests_unixsocket
+    requests_unixsocket.monkeypatch()
+    print(f"   ✓ Unix socket adapter registered")
+    
     import docker
     print(f"   Docker SDK version: {docker.__version__}")
     

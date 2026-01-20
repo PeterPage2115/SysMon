@@ -54,16 +54,16 @@ def test_docker_unavailable():
 
 
 def test_docker_error_handling(mock_system_monitor, monkeypatch):
-    """Test Docker stats error handling."""
+    """Test Docker API error handling."""
     from unittest.mock import MagicMock
     
     monitor = SystemMonitor()
     
-    # Mock Docker client to raise exception
+    # Mock APIClient to raise exception
     def raise_error(*args, **kwargs):
         raise Exception("Docker daemon not available")
     
-    monitor.docker_client.containers.list = raise_error
+    monitor.api_client.containers = raise_error
     
     stats = monitor._get_docker_stats()
     

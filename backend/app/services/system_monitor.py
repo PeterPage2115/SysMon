@@ -1,6 +1,7 @@
 """System monitoring service using psutil and Docker SDK."""
 import psutil
 import docker
+import os
 from datetime import datetime
 from typing import Dict, Any
 from app.models import SystemStats
@@ -11,15 +12,36 @@ class SystemMonitor:
     
     def __init__(self):
         """Initialize Docker client."""
+        self.docker_client = None
+        self.docker_available = False
+        
         try:
-            # Use explicit socket path for Docker API  
-            # Note: unix:/// requires 3 slashes for absolute path
-            self.docker_client = docker.DockerClient(base_url='unix:///var/run/docker.sock')
+            # Debug: Check environment
+            docker_host_env = os.environ.get('DOCKER_HOST', 'NOT_SET')
+            print(f"🔍 DOCKER_HOST environment: {docker_host_env}")
+            
+            # CRITICAL: Completely bypass DockerClient and use APIClient directly
+            # DockerClient() has internal auto-detection that can fail in containers
+            from docker import APIClient
+            
+            # Create low-level API client with explicit socket
+            api_client = APIClient(
+                base_url='unix:///var/run/docker.sock',
+                version='auto',  # Auto-detect API version
+                timeout=10
+            )
+            
+            # Test connection
+            version = api_client.version()
+            print(f"✓ Docker API connected - Docker v{version.get('Version', 'unknown')}")
+            
+            # Store API client for container operations
+            self.api_client = api_client
             self.docker_available = True
-            print("✓ Docker SDK connected")
+            
         except Exception as e:
-            print(f"⚠ Docker SDK unavailable: {e}")
-            self.docker_client = None
+            print(f"⚠ Docker API unavailable: {e}")
+            self.api_client = None
             self.docker_available = False
     
     def get_stats(self) -> SystemStats:
@@ -62,9 +84,12 @@ class SystemMonitor:
             return {"total": 0, "running": 0, "stopped": 0}
         
         try:
-            containers = self.docker_client.containers.list(all=True)
-            running = sum(1 for c in containers if c.status == "running")
-            stopped = sum(1 for c in containers if c.status in ["exited", "stopped"])
+            # Use APIClient.containers() instead of high-level API
+            containers = self.api_client.containers(all=True)
+            
+            # Count by state
+            running = sum(1 for c in containers if c.get('State') == 'running')
+            stopped = sum(1 for c in containers if c.get('State') in ['exited', 'stopped', 'created'])
             
             return {
                 "total": len(containers),

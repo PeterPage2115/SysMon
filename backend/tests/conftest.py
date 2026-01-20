@@ -39,30 +39,28 @@ def mock_system_monitor(monkeypatch):
         total=1000 * (1024 ** 3)  # 1000 GB (1 TB)
     )
     
-    # Mock docker
-    mock_docker_client = MagicMock()
-    mock_container_running = Mock(status="running")
-    mock_container_stopped = Mock(status="exited")
-    mock_docker_client.containers.list.return_value = [
-        mock_container_running,
-        mock_container_running,
-        mock_container_running,
-        mock_container_stopped,
+    # Mock docker APIClient
+    mock_api_client = MagicMock()
+    # APIClient.containers() returns list of dicts, not objects
+    mock_api_client.containers.return_value = [
+        {"State": "running", "Id": "abc123"},
+        {"State": "running", "Id": "def456"},
+        {"State": "running", "Id": "ghi789"},
+        {"State": "exited", "Id": "jkl012"},
     ]
+    mock_api_client.version.return_value = {"Version": "24.0.0"}
     
     mock_docker = MagicMock()
-    # Mock both from_env and DockerClient for compatibility
-    mock_docker.from_env.return_value = mock_docker_client
-    mock_docker.DockerClient.return_value = mock_docker_client
+    # Mock APIClient constructor
+    mock_docker.APIClient.return_value = mock_api_client
     
     # Apply mocks - patch modules where they're used
     monkeypatch.setattr("app.services.system_monitor.psutil.cpu_percent", mock_psutil.cpu_percent)
     monkeypatch.setattr("app.services.system_monitor.psutil.virtual_memory", mock_psutil.virtual_memory)
     monkeypatch.setattr("app.services.system_monitor.psutil.disk_usage", mock_psutil.disk_usage)
-    monkeypatch.setattr("app.services.system_monitor.docker.from_env", mock_docker.from_env)
-    monkeypatch.setattr("app.services.system_monitor.docker.DockerClient", mock_docker.DockerClient)
+    monkeypatch.setattr("app.services.system_monitor.docker.APIClient", mock_docker.APIClient)
     
     return {
         "psutil": mock_psutil,
-        "docker_client": mock_docker_client
+        "api_client": mock_api_client
     }

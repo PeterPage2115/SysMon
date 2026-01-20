@@ -15,6 +15,10 @@ from app.models import Tamagotchi, SystemStats
 from app.services.system_monitor import SystemMonitor
 from app.websocket.manager import ConnectionManager
 
+# Read version
+VERSION_FILE = Path(__file__).parent.parent.parent / "VERSION"
+VERSION = VERSION_FILE.read_text().strip() if VERSION_FILE.exists() else "dev"
+
 # Initialize components
 monitor = SystemMonitor()
 manager = ConnectionManager()
@@ -67,7 +71,7 @@ async def broadcast_system_stats():
 async def lifespan(app: FastAPI):
     """Startup and shutdown events."""
     # Startup
-    print("🚀 Starting SysMon...")
+    print(f"🚀 Starting SysMon v{VERSION}...")
     init_db()
     
     # Start background stats broadcaster
@@ -93,7 +97,12 @@ app = FastAPI(
 @app.get("/api/health")
 async def health_check():
     """Health check endpoint."""
-    return {"status": "healthy", "service": "SysMon"}
+    return {
+        "status": "healthy", 
+        "service": "SysMon",
+        "version": VERSION,
+        "docker_available": monitor.docker_available
+    }
 
 
 @app.get("/api/stats")

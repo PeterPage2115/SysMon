@@ -3,7 +3,10 @@
   import SystemStats from './lib/SystemStats.svelte'
   import { websocketStore } from './stores/websocket.js'
 
-  const { connected, stats, tamagotchi } = websocketStore
+  // Access store value directly with $
+  $: connected = $websocketStore.connected
+  $: stats = $websocketStore.stats
+  $: tamagotchi = $websocketStore.tamagotchi
 </script>
 
 <main>
@@ -11,7 +14,7 @@
     <header>
       <h1>🖥️ SysMon</h1>
       <p class="subtitle">Server Tamagotchi</p>
-      {#if $connected}
+      {#if connected}
         <span class="status connected">● Connected</span>
       {:else}
         <span class="status disconnected">● Disconnected</span>
@@ -19,8 +22,8 @@
     </header>
 
     <div class="content">
-      <Tamagotchi tamagotchi={$tamagotchi} />
-      <SystemStats stats={$stats} />
+      <Tamagotchi tamagotchi={tamagotchi} />
+      <SystemStats stats={stats} />
     </div>
   </div>
 </main>

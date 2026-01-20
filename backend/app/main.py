@@ -15,9 +15,16 @@ from app.models import Tamagotchi, SystemStats
 from app.services.system_monitor import SystemMonitor
 from app.websocket.manager import ConnectionManager
 
-# Read version
-VERSION_FILE = Path(__file__).parent.parent.parent / "VERSION"
-VERSION = VERSION_FILE.read_text().strip() if VERSION_FILE.exists() else "dev"
+# Read version from VERSION file (check multiple locations for dev vs container)
+VERSION_FILE_LOCATIONS = [
+    Path("/app/VERSION"),  # Container path (Dockerfile: COPY VERSION /app/VERSION)
+    Path(__file__).parent.parent.parent / "VERSION",  # Dev path
+]
+VERSION = "dev"
+for version_file in VERSION_FILE_LOCATIONS:
+    if version_file.exists():
+        VERSION = version_file.read_text().strip()
+        break
 
 # Initialize components
 monitor = SystemMonitor()

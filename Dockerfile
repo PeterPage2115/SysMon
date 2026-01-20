@@ -24,12 +24,12 @@ RUN apt-get update && \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy VERSION file first (before backend/)
+COPY VERSION /app/VERSION
+
 # Install Python dependencies
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy VERSION file
-COPY VERSION /app/VERSION
 
 # Copy backend code
 COPY backend/ .

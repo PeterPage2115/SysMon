@@ -85,6 +85,15 @@ async def lifespan(app: FastAPI):
     print(f"🚀 Starting SysMon v{VERSION}...")
     init_db()
     
+    # Ensure Tamagotchi exists
+    with Session(engine) as session:
+        tamagotchi = session.exec(select(Tamagotchi)).first()
+        if not tamagotchi:
+            tamagotchi = Tamagotchi()
+            session.add(tamagotchi)
+            session.commit()
+            print("✓ Created initial Tamagotchi")
+    
     # Start background stats broadcaster
     task = asyncio.create_task(broadcast_system_stats())
     
@@ -183,36 +192,7 @@ async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     
     try:
-        # Send initial data immediately upon connection
-        stats = monitor.get_stats()
-        health_score = monitor.get_health_score(stats)
-        
-        with Session(engine) as session:
-            tamagotchi = session.exec(select(Tamagotchi)).first()
-            if tamagotchi:
-                tamagotchi.health = health_score
-                session.add(tamagotchi)
-                session.commit()
-                session.refresh(tamagotchi)
-                
-                # Convert stats to dict with ISO timestamp
-                stats_dict = stats.model_dump()
-                stats_dict["timestamp"] = stats.timestamp.isoformat()
-                
-                initial_message = {
-                    "type": "stats_update",
-                    "stats": stats_dict,
-                    "tamagotchi": {
-                        "name": tamagotchi.name,
-                        "level": tamagotchi.level,
-                        "xp": tamagotchi.xp,
-                        "health": tamagotchi.health,
-                        "happiness": tamagotchi.happiness
-                    }
-                }
-                await websocket.send_json(initial_message)
-        
-        # Keep connection alive - just wait for disconnect
+        # Keep connection alive - broadcast loop will send data
         while True:
             try:
                 # Wait for client messages with a timeout

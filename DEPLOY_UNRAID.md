@@ -52,11 +52,15 @@ Fill in the following settings:
 In the "Extra Parameters" field, add:
 
 ```
---pid=host
+--pid=host --label net.unraid.docker.webui='http://[IP]:[PORT:8000]' --label net.unraid.docker.icon='https://raw.githubusercontent.com/PeterPage2115/SysMon/main/icon.svg'
 ```
 
-**Why is this needed?**  
-The `--pid=host` flag allows the container to see your **Unraid server's actual CPU and RAM usage**, not just the container's isolated metrics. Without this, SysMon would only monitor its own tiny resource footprint instead of your entire server.
+⚠️ **IMPORTANT**: Must have **two dashes** (`--pid=host`), not one dash (`-pid=host` or `pid-host` won't work!)
+
+**What these do:**
+- `--pid=host` - Allows seeing actual server CPU/RAM (not just container metrics)
+- `--label net.unraid.docker.webui` - Adds "WebUI" button in Unraid Docker tab
+- `--label net.unraid.docker.icon` - Shows SysMon icon in Unraid interface
 
 #### **Environment Variables** (Optional)
 
@@ -76,14 +80,14 @@ Repository: peterpage2115/sysmon:latest
 Network Type: Bridge
 
 Port Mappings:
-  8000 → 8000
+  8000 → 8000 (or 8001 if 8000 is taken)
 
 Volume Mappings:
   /var/run/docker.sock → /var/run/docker.sock (RW)
   /app/data → /mnt/user/appdata/sysmon (RW)
 
 Extra Parameters:
-  --pid=host
+  --pid=host --label net.unraid.docker.webui='http://[IP]:[PORT:8000]' --label net.unraid.docker.icon='https://raw.githubusercontent.com/PeterPage2115/SysMon/main/icon.svg'
 ```
 
 ---
@@ -113,6 +117,8 @@ If you prefer the terminal:
 docker run -d \
   --name=sysmon \
   --pid=host \
+  --label net.unraid.docker.webui='http://[IP]:[PORT:8000]' \
+  --label net.unraid.docker.icon='https://raw.githubusercontent.com/PeterPage2115/SysMon/main/icon.svg' \
   -p 8000:8000 \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -v /mnt/user/appdata/sysmon:/app/data \
@@ -179,6 +185,20 @@ To update to the latest version:
 
 **Solution**: Map `/app/data` to a persistent host path like `/mnt/user/appdata/sysmon`.
 
+### Port 8000 already in use
+
+**Problem**: Error "Bind for 0.0.0.0:8000 failed: port is already allocated"
+
+**Solution**: 
+1. Find which container uses port 8000:
+   ```bash
+   docker ps --format "table {{.Names}}\t{{.Ports}}" | grep 8000
+   ```
+2. Change SysMon to use a different port (e.g., 8001, 8080, or 9000):
+   - In Unraid UI: Change "Host Port" from `8000` to `8001`
+   - Access WebUI at: `http://YOUR-UNRAID-IP:8001`
+3. Or stop the conflicting container if you don't need it
+
 ### WebUI not loading
 
 **Problem**: Cannot access `http://unraid-ip:8000`.
@@ -186,7 +206,7 @@ To update to the latest version:
 **Solution**: 
 1. Check container is running: `docker ps | grep sysmon`
 2. Check logs: `docker logs sysmon`
-3. Verify port 8000 is not used by another container
+3. Verify port is not used by another container (see "Port already in use" above)
 
 ---
 

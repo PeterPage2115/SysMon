@@ -1,21 +1,31 @@
 # 🔄 Force Update SysMon in Unraid
 
-Unraid może pokazywać "up-to-date" mimo że są nowe zmiany w obrazie `latest`. To jest problem cache Docker Hub.
+## ⚡ NOWA WERSJA: v0.1.1 (commit 67a8cb7)
 
-## Rozwiązanie 1: Użyj konkretnego commit SHA
+**WAŻNA POPRAWKA**: Całkowicie przepisany Docker SDK - używamy teraz `APIClient` zamiast `DockerClient` aby ominąć problemy z auto-detekcją w środowisku kontenerowym.
 
-Zamiast `peterpage2115/sysmon:latest`, użyj najnowszego commit SHA:
+---
+
+## Szybka aktualizacja
+
+Użyj najnowszego tagu z wersją:
 
 ```
-peterpage2115/sysmon:main-6f284f1
+peterpage2115/sysmon:0.1
 ```
 
-### Jak zmienić w Unraid:
-1. Idź do Docker tab
-2. Kliknij **EDIT** przy kontenerze SysMon
-3. W polu **Repository** zmień na: `peterpage2115/sysmon:main-6f284f1`
-4. Kliknij **Apply**
-5. Unraid wymusi pobranie nowego obrazu
+Lub konkretnego commit SHA:
+
+```
+peterpage2115/sysmon:main-67a8cb7
+```
+
+### Jak zaktualizować w Unraid:
+1. **STOP** kontenera SysMon
+2. Kliknij **EDIT**
+3. Zmień **Repository** na: `peterpage2115/sysmon:0.1`
+4. Kliknij **Apply** - wymusi pobranie nowego obrazu
+5. Sprawdź logi
 
 ---
 
@@ -56,53 +66,52 @@ peterpage2115/sysmon@sha256:XXXXX
 
 ---
 
-## Weryfikacja poprawki
+## ✅ Weryfikacja poprawki
 
-Po uruchomieniu nowego obrazu sprawdź logi:
+Po uruchomieniu nowej wersji sprawdź logi:
 
 ```bash
 docker logs sysmon | head -20
 ```
 
-**Oczekiwany output** (powinno być):
+**v0.1.1 powinno pokazywać**:
 ```
-✓ Docker SDK connected
+🚀 Starting SysMon v0.1.1...
+🔍 DOCKER_HOST environment: NOT_SET (lub inna wartość)
+✓ Docker API connected - Docker v24.x.x    <-- TO!
 ✓ Started background stats broadcaster
 ```
 
 **NIE powinno być**:
 ```
-⚠ Docker SDK unavailable: Error while fetching server API version: Not supported URL scheme http+docker
+⚠ Docker API unavailable: Error while fetching server API version: Not supported URL scheme http+docker
 ```
 
 ---
 
-## Debug: Sprawdź wersję obrazu
+## 📊 Sprawdź wersję przez API
 
 ```bash
-# Sprawdź kiedy obraz został stworzony
-docker inspect peterpage2115/sysmon:latest | grep -A 5 Created
+curl http://TWOJ-UNRAID-IP:8001/api/health
+```
 
-# Sprawdź labels (powinny być webui i icon)
-docker inspect peterpage2115/sysmon:latest | grep net.unraid
-
-# Sprawdź warstwy obrazu
-docker history peterpage2115/sysmon:latest | head -10
+Odpowiedź powinna zawierać:
+```json
+{
+  "status": "healthy",
+  "service": "SysMon",
+  "version": "0.1.1",
+  "docker_available": true    <-- TO musi być true!
+}
 ```
 
 ---
 
-## Najnowsze zmiany (commit 6f284f1):
+## 🏷️ Dostępne wersje obrazów
 
-- ✅ Poprawiono Docker SDK: `unix:///var/run/docker.sock` (3 slashe)
-- ✅ Dodano Unraid labels (webui + icon) do Dockerfile
-- ✅ Wszystkie 19 testów przechodzą
-- ✅ Frontend działający poprawnie
+- `latest` - zawsze najnowsza wersja (może być cache problem)
+- `0.1` - semantic version (v0.1.x)
+- `main-67a8cb7` - konkretny commit SHA
+- `main-96b7d41` - poprzedni commit
 
----
-
-## Pomoc
-
-Jeśli nadal widzisz błąd "Not supported URL scheme", to znaczy że używasz **starego obrazu**.
-
-Najszybsze rozwiązanie: **Użyj Rozwiązania 1** (commit SHA tag).
+**Zalecane**: Używaj `0.1` dla stabilności lub `main-XXXXX` dla najnowszych zmian.

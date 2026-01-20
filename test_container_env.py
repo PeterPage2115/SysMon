@@ -50,20 +50,15 @@ if socket_path.exists():
 # 7. Test Docker SDK
 print(f"\n7. Docker SDK test:")
 try:
-    # CRITICAL: Import requests-unixsocket BEFORE docker SDK
-    # This registers the Unix socket adapter with requests library
-    import requests_unixsocket
-    requests_unixsocket.monkeypatch()
-    print(f"   ✓ Unix socket adapter registered")
-    
     import docker
     print(f"   Docker SDK version: {docker.__version__}")
     
-    # Test APIClient
+    # Test APIClient with correct URL scheme
+    # Docker SDK expects 'http+unix://' prefix to mount UnixHTTPAdapter
     print(f"\n   Testing APIClient:")
     from docker import APIClient
     api_client = APIClient(
-        base_url='unix:///var/run/docker.sock',
+        base_url='http+unix:///var/run/docker.sock',
         version='1.41',  # Fixed version, no auto-detect
         timeout=10
     )

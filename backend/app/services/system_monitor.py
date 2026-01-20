@@ -6,35 +6,6 @@ from datetime import datetime
 from typing import Dict, Any
 from app.models import SystemStats
 
-# CRITICAL FIX: Manually register Unix socket adapter for Docker SDK
-# This fixes Docker SDK 7.0.0 compatibility with Unix sockets
-try:
-    import requests
-    from requests.adapters import HTTPAdapter
-    from requests_unixsocket import UnixAdapter
-    
-    # Mount Unix adapter for http+docker:// scheme
-    session = requests.Session()
-    session.mount('http+docker://', UnixAdapter())
-    
-    # Inject into Docker SDK's session
-    import docker.api.client
-    if hasattr(docker.api.client, 'APIClient'):
-        original_init = docker.api.client.APIClient.__init__
-        
-        def patched_init(self, *args, **kwargs):
-            original_init(self, *args, **kwargs)
-            if hasattr(self, '_session'):
-                self._session.mount('http+docker://', UnixAdapter())
-        
-        docker.api.client.APIClient.__init__ = patched_init
-    
-    print("✓ Unix socket adapter registered for Docker SDK")
-except ImportError:
-    print("⚠ requests-unixsocket not available, relying on Docker SDK defaults")
-except Exception as e:
-    print(f"⚠ Failed to register Unix adapter: {e}")
-
 
 class SystemMonitor:
     """Monitor system metrics (CPU, RAM, disk, Docker)."""
@@ -54,9 +25,10 @@ class SystemMonitor:
             from docker import APIClient
             
             # Create low-level API client with explicit socket and API version
+            # Using 'http+unix://' prefix to trigger Docker SDK's built-in UnixHTTPAdapter
             # Using version='1.41' (Docker 20.10+) to avoid auto-detection which fails in some envs
             api_client = APIClient(
-                base_url='unix:///var/run/docker.sock',
+                base_url='http+unix:///var/run/docker.sock',
                 version='1.41',  # Fixed API version (Docker 20.10+), no auto-detect
                 timeout=10
             )

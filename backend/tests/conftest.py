@@ -51,13 +51,16 @@ def mock_system_monitor(monkeypatch):
     ]
     
     mock_docker = MagicMock()
+    # Mock both from_env and DockerClient for compatibility
     mock_docker.from_env.return_value = mock_docker_client
+    mock_docker.DockerClient.return_value = mock_docker_client
     
     # Apply mocks - patch modules where they're used
     monkeypatch.setattr("app.services.system_monitor.psutil.cpu_percent", mock_psutil.cpu_percent)
     monkeypatch.setattr("app.services.system_monitor.psutil.virtual_memory", mock_psutil.virtual_memory)
     monkeypatch.setattr("app.services.system_monitor.psutil.disk_usage", mock_psutil.disk_usage)
     monkeypatch.setattr("app.services.system_monitor.docker.from_env", mock_docker.from_env)
+    monkeypatch.setattr("app.services.system_monitor.docker.DockerClient", mock_docker.DockerClient)
     
     return {
         "psutil": mock_psutil,

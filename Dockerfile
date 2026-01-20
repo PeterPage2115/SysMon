@@ -12,6 +12,10 @@ RUN npm run build
 # Python backend + serve static frontend
 FROM python:3.11-slim
 
+# Unraid metadata labels
+LABEL net.unraid.docker.webui="http://[IP]:[PORT:8000]"
+LABEL net.unraid.docker.icon="https://raw.githubusercontent.com/PeterPage2115/SysMon/main/icon.png"
+
 WORKDIR /app
 
 # Install system dependencies

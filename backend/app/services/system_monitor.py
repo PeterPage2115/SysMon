@@ -12,7 +12,8 @@ class SystemMonitor:
     def __init__(self):
         """Initialize Docker client."""
         try:
-            self.docker_client = docker.from_env()
+            # Use explicit socket path for Docker API
+            self.docker_client = docker.DockerClient(base_url='unix://var/run/docker.sock')
             self.docker_available = True
             print("✓ Docker SDK connected")
         except Exception as e:

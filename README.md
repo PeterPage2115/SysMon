@@ -1,125 +1,81 @@
 # SysMon - Server Tamagotchi 🖥️🐾
 
-A cute server monitoring tool that visualizes your system health through a Tamagotchi-like creature. Built with Python FastAPI, WebSockets, and Svelte.
+A gamified server monitoring tool that visualizes your system health through a Tamagotchi-like creature.
+
+![SysMon Screenshot](https://raw.githubusercontent.com/PeterPage2115/SysMon/main/icon.png)
 
 ## Features
 
-- 🎮 **Gamified Monitoring**: Server pet with levels, XP, and health based on system metrics
-- 📊 **Real-time Stats**: WebSocket updates every 2 seconds for CPU, RAM, disk, and Docker containers
-- 🐳 **Docker Integration**: Monitor container health via Docker SDK
-- 💾 **Persistent State**: SQLite database saves your Tamagotchi's progress
-- 🎨 **Beautiful UI**: Gradient-rich Svelte frontend with responsive design
-- 🏗️ **Single Container**: Optimized for Unraid deployment
+- 🎮 **Gamified Monitoring** - Server pet with levels, XP, and health based on system metrics
+- 📊 **Real-time Stats** - WebSocket updates every 2 seconds for CPU, RAM, disk, and Docker containers
+- 🐳 **Docker Integration** - Monitor container health via Docker SDK
+- 💾 **Persistent State** - SQLite database saves your Tamagotchi's progress
+- 🎨 **Beautiful UI** - Gradient-rich Svelte frontend with responsive design
 
-## Project Structure
+## Quick Start (Docker Compose)
 
-```
-SysMon/
-├── backend/
-│   ├── app/
-│   │   ├── main.py              # FastAPI app + WebSocket broadcasting
-│   │   ├── models.py            # SQLModel data models
-│   │   ├── database.py          # SQLite session management
-│   │   ├── services/
-│   │   │   └── system_monitor.py  # psutil + Docker SDK metrics
-│   │   └── websocket/
-│   │       └── manager.py       # WebSocket connection manager
-│   └── requirements.txt
-├── frontend/
-│   ├── src/
-│   │   ├── App.svelte
-│   │   ├── lib/
-│   │   │   ├── Tamagotchi.svelte
-│   │   │   └── SystemStats.svelte
-│   │   └── stores/
-│   │       └── websocket.js     # WebSocket store with auto-reconnect
-│   └── package.json
-├── Dockerfile                   # Multi-stage build (Node + Python)
-└── docker-compose.yml
+```bash
+# Clone the repository
+git clone https://github.com/PeterPage2115/SysMon.git
+cd SysMon
+
+# Start the container
+docker-compose up -d
+
+# Access the WebUI
+open http://localhost:8000
 ```
 
-## Unraid Deployment
+### Unraid Users
 
-### Requirements
-- Unraid 6.9+
-- Docker enabled
+The `docker-compose.yml` is pre-configured with:
+- `--pid=host` for real host metrics (not container stats)
+- Docker socket access for container monitoring
+- Persistent data volume
 
-### Setup
+Just run `docker-compose up -d` and access `http://YOUR-UNRAID-IP:8000`.
 
-1. **Clone or copy the project to your Unraid server**:
-   ```bash
-   cd /mnt/user/appdata
-   git clone <your-repo> sysmon
-   cd sysmon
-   ```
+## How It Works
 
-2. **Build and run with Docker Compose**:
-   ```bash
-   docker-compose up -d
-   ```
+Your Tamagotchi's mood reflects server health:
+- 😊 **Happy** - Low resource usage (< 50%)
+- 😐 **Neutral** - Moderate usage (50-80%)  
+- 😰 **Stressed** - High usage (80-95%)
+- 🤒 **Critical** - Overloaded (> 95%)
 
-3. **Access the web UI**:
-   - Navigate to `http://YOUR-UNRAID-IP:8000`
+Feed your pet to gain XP and level up!
 
-### Configuration
+## API Endpoints
 
-The [docker-compose.yml](docker-compose.yml) is pre-configured for Unraid:
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/health` | GET | Health check with version info |
+| `/api/stats` | GET | Current system statistics |
+| `/api/tamagotchi` | GET | Tamagotchi state |
+| `/api/tamagotchi/rename?name=X` | POST | Rename your pet |
+| `/api/tamagotchi/feed` | POST | Feed for +10 XP |
+| `/ws` | WebSocket | Real-time updates |
 
-- **`pid: host`** - Allows psutil to see host CPU/RAM (not container stats)
-- **`/var/run/docker.sock`** - Docker SDK access for container monitoring
-- **`./data`** - Persistent SQLite database (Tamagotchi state)
+## Tech Stack
+
+- **Backend**: Python 3.11, FastAPI, WebSockets, psutil, Docker SDK
+- **Frontend**: Svelte 4, Vite
+- **Database**: SQLite (SQLModel)
+- **Deployment**: Docker (multi-stage build)
 
 ## Local Development
 
-### Backend
-
 ```bash
+# Backend
 cd backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload
-```
 
-### Frontend
-
-```bash
+# Frontend  
 cd frontend
 npm install
 npm run dev
 ```
-
-Visit `http://localhost:5173` (frontend) and `http://localhost:8000` (backend).
-
-## API Endpoints
-
-- `GET /api/health` - Health check
-- `GET /api/stats` - Current system statistics
-- `GET /api/tamagotchi` - Tamagotchi state
-- `POST /api/tamagotchi/rename?name=NewName` - Rename your pet
-- `POST /api/tamagotchi/feed` - Feed for +10 XP
-- `WS /ws` - WebSocket for real-time updates
-
-## How It Works
-
-1. **Backend Loop**: [main.py](backend/app/main.py) runs `broadcast_system_stats()` as a background task
-2. **Metrics Collection**: [system_monitor.py](backend/app/services/system_monitor.py) uses `psutil` and Docker SDK
-3. **Broadcasting**: [manager.py](backend/app/websocket/manager.py) sends JSON to all connected WebSocket clients
-4. **Frontend Store**: [websocket.js](frontend/src/stores/websocket.js) auto-connects and updates Svelte components
-5. **Tamagotchi Logic**: Health score calculated from CPU/RAM/disk/Docker stats
-
-## Health Score Algorithm
-
-```python
-health = (
-    (100 - cpu_percent) * 0.3 +
-    (100 - memory_percent) * 0.3 +
-    (100 - disk_percent) * 0.2 +
-    min(100, running_containers * 10) * 0.2
-)
-```
-
-Lower resource usage = happier pet! 😊
 
 ## License
 
@@ -127,4 +83,4 @@ MIT
 
 ## Contributing
 
-Pull requests welcome! This is a fun project to learn FastAPI, WebSockets, and Svelte.
+Pull requests welcome!

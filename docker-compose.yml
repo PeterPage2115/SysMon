@@ -1,11 +1,11 @@
 services:
   sysmon:
-    build: .
+    image: peterpage2115/sysmon:0.1  # Use pre-built image from Docker Hub
     container_name: sysmon
     # pid: host allows psutil to see host CPU/RAM, not just container stats
     pid: host
     ports:
-      - "8000:8000"  # FastAPI serves both API and static Svelte frontend
+      - "8001:8000"  # FastAPI serves both API and static Svelte frontend
     labels:
       - "net.unraid.docker.webui=http://[IP]:[PORT:8000]"
       - "net.unraid.docker.icon=https://raw.githubusercontent.com/PeterPage2115/SysMon/main/icon.png"

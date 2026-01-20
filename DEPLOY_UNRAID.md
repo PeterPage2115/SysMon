@@ -52,7 +52,7 @@ Fill in the following settings:
 In the "Extra Parameters" field, add:
 
 ```
---pid=host --label net.unraid.docker.webui='http://[IP]:[PORT:8000]' --label net.unraid.docker.icon='https://raw.githubusercontent.com/PeterPage2115/SysMon/main/icon.svg'
+--pid=host --label net.unraid.docker.webui='http://[IP]:[PORT:8000]' --label net.unraid.docker.icon='https://raw.githubusercontent.com/PeterPage2115/SysMon/main/icon.png'
 ```
 
 ⚠️ **IMPORTANT**: Must have **two dashes** (`--pid=host`), not one dash (`-pid=host` or `pid-host` won't work!)
@@ -87,7 +87,7 @@ Volume Mappings:
   /app/data → /mnt/user/appdata/sysmon (RW)
 
 Extra Parameters:
-  --pid=host --label net.unraid.docker.webui='http://[IP]:[PORT:8000]' --label net.unraid.docker.icon='https://raw.githubusercontent.com/PeterPage2115/SysMon/main/icon.svg'
+  --pid=host --label net.unraid.docker.webui='http://[IP]:[PORT:8000]' --label net.unraid.docker.icon='https://raw.githubusercontent.com/PeterPage2115/SysMon/main/icon.png'
 ```
 
 ---
@@ -118,7 +118,7 @@ docker run -d \
   --name=sysmon \
   --pid=host \
   --label net.unraid.docker.webui='http://[IP]:[PORT:8000]' \
-  --label net.unraid.docker.icon='https://raw.githubusercontent.com/PeterPage2115/SysMon/main/icon.svg' \
+  --label net.unraid.docker.icon='https://raw.githubusercontent.com/PeterPage2115/SysMon/main/icon.png' \
   -p 8000:8000 \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -v /mnt/user/appdata/sysmon:/app/data \

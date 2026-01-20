@@ -183,7 +183,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
 # Serve static frontend files (built Svelte app)
 # Mount static files after API routes
-static_dir = Path(__file__).parent.parent.parent / "frontend" / "dist"
+static_dir = Path(__file__).parent.parent / "frontend" / "dist"
 
 if static_dir.exists():
     app.mount("/assets", StaticFiles(directory=static_dir / "assets"), name="assets")

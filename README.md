@@ -2,7 +2,7 @@
 
 A gamified server monitoring tool that visualizes your system health through a Tamagotchi-like creature.
 
-![SysMon Screenshot](https://raw.githubusercontent.com/PeterPage2115/SysMon/main/icon.png)
+![SysMon Screenshot](https://github.com/PeterPage2115/SysMon/blob/92900139dc62e5c820b41878efdc2ebac0384ad7/icon.png)
 
 ## Features
 

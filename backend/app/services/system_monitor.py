@@ -24,16 +24,17 @@ class SystemMonitor:
             # DockerClient() has internal auto-detection that can fail in containers
             from docker import APIClient
             
-            # Create low-level API client with explicit socket
+            # Create low-level API client with explicit socket and API version
+            # Using version='1.41' (Docker 20.10+) to avoid auto-detection which fails in some envs
             api_client = APIClient(
                 base_url='unix:///var/run/docker.sock',
-                version='auto',  # Auto-detect API version
+                version='1.41',  # Fixed API version (Docker 20.10+), no auto-detect
                 timeout=10
             )
             
             # Test connection
             version = api_client.version()
-            print(f"✓ Docker API connected - Docker v{version.get('Version', 'unknown')}")
+            print(f"✓ Docker API connected - Docker v{version.get('Version', 'unknown')}, API v{version.get('ApiVersion', 'unknown')}")
             
             # Store API client for container operations
             self.api_client = api_client

@@ -58,11 +58,11 @@ try:
     from docker import APIClient
     api_client = APIClient(
         base_url='unix:///var/run/docker.sock',
-        version='auto',
+        version='1.41',  # Fixed version, no auto-detect
         timeout=10
     )
     version = api_client.version()
-    print(f"   ✓ Connected - Docker v{version.get('Version')}")
+    print(f"   ✓ Connected - Docker v{version.get('Version')}, API v{version.get('ApiVersion')}")
     
     # List containers
     containers = api_client.containers(all=True)

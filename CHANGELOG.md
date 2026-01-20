@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-01-20
+
+### Fixed
+- **Docker SDK Unix Socket**: Fixed "Not supported URL scheme http+docker" error by pinning `requests<2.32.0` (compatibility issue with requests 2.32.2+ API change)
+- **WebSocket Stability**: Removed blocking `psutil.cpu_percent(interval=1)` call from WebSocket endpoint; now runs in thread pool via `asyncio.to_thread()`
+- **Svelte Store Access**: Fixed incorrect store destructuring in App.svelte that caused "Disconnected" status and no data display
+- **JSON Serialization**: Fixed "Object of type datetime is not JSON serializable" error by converting timestamps to ISO format
+- **Host Disk Monitoring**: Added configurable `DISK_PATH` environment variable to monitor host disk instead of container filesystem
+- **Dockerfile Cleanup**: Removed references to deleted test files
+
+### Changed
+- **Docker SDK**: Downgraded from 7.0.0 to 6.1.3 for better Unix socket compatibility
+- **Broadcast Loop**: Now uses `asyncio.to_thread()` for non-blocking stats collection
+- **Startup**: Tamagotchi is now created automatically on application startup
+- **Docker Compose**: Updated to use `latest` tag and added host disk mount (`/mnt/user:/host/mnt/user:ro`)
+
+### Removed
+- Removed obsolete documentation files (DEPLOY_UNRAID.md, FORCE_UPDATE_UNRAID.md, UPDATE_UNRAID.md)
+- Removed diagnostic test scripts (simple_test.py, test_container_env.py, test_docker_sdk.py)
+
+### Technical Details
+- Added broadcast logging ("📡 Broadcasting to X client(s)...")
+- Improved error handling in WebSocket endpoint
+- Environment variable `DISK_PATH` defaults to `/` with fallback on error
+
 ## [0.1.0] - 2026-01-20
 
 ### Added

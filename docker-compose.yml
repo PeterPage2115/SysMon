@@ -1,6 +1,6 @@
 services:
   sysmon:
-    image: peterpage2115/sysmon:0.1  # Use pre-built image from Docker Hub
+    image: peterpage2115/sysmon:latest
     container_name: sysmon
     # pid: host allows psutil to see host CPU/RAM, not just container stats
     pid: host
@@ -14,9 +14,14 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # SQLite database persistence (Tamagotchi state: name, level, XP)
       - ./data:/app/data
+      # Host disk monitoring - mount host path to check disk usage
+      # For Unraid: /mnt/user is the main array
+      - /mnt/user:/host/mnt/user:ro
     environment:
       - PYTHONUNBUFFERED=1
       - DATABASE_URL=sqlite:///./data/sysmon.db
+      # Path to check for disk usage (inside container)
+      - DISK_PATH=/host/mnt/user
     restart: unless-stopped
     networks:
       - sysmon-network

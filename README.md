@@ -31,9 +31,12 @@ open http://localhost:8000
 The `docker-compose.yml` is pre-configured with:
 - `--pid=host` for real host metrics (not container stats)
 - Docker socket access for container monitoring
+- Host disk mount (`/mnt/user`) for accurate disk usage
 - Persistent data volume
 
-Just run `docker-compose up -d` and access `http://YOUR-UNRAID-IP:8000`.
+**Important**: Update `DISK_PATH` environment variable if your Unraid array is at a different path.
+
+Just run `docker-compose up -d` and access `http://YOUR-UNRAID-IP:8001`.
 
 ## How It Works
 

@@ -6,6 +6,10 @@ from datetime import datetime
 from typing import Dict, Any
 from app.models import SystemStats
 
+# Host disk path - can be overridden via environment variable
+# For Unraid: mount /mnt/user to /host/mnt/user and set DISK_PATH=/host/mnt/user
+DISK_PATH = os.environ.get('DISK_PATH', '/')
+
 
 class SystemMonitor:
     """Monitor system metrics (CPU, RAM, disk, Docker)."""
@@ -57,8 +61,12 @@ class SystemMonitor:
         memory_used_gb = memory.used / (1024 ** 3)
         memory_total_gb = memory.total / (1024 ** 3)
         
-        # Disk usage (root partition)
-        disk = psutil.disk_usage('/')
+        # Disk usage - try configured path, fallback to root
+        try:
+            disk = psutil.disk_usage(DISK_PATH)
+        except (FileNotFoundError, PermissionError):
+            # Fallback to container root if host path not available
+            disk = psutil.disk_usage('/')
         disk_percent = disk.percent
         disk_used_gb = disk.used / (1024 ** 3)
         disk_total_gb = disk.total / (1024 ** 3)

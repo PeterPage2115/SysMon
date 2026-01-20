@@ -38,8 +38,8 @@ async def broadcast_system_stats():
     
     while True:
         try:
-            # Collect system stats
-            stats = monitor.get_stats()
+            # Collect system stats in thread pool (get_stats blocks for 1 second)
+            stats = await asyncio.to_thread(monitor.get_stats)
             health_score = monitor.get_health_score(stats)
             
             # Update Tamagotchi health in database
@@ -68,7 +68,9 @@ async def broadcast_system_stats():
                         }
                     }
                     
-                    if manager.get_connection_count() > 0:
+                    conn_count = manager.get_connection_count()
+                    if conn_count > 0:
+                        print(f"📡 Broadcasting to {conn_count} client(s)...")
                         await manager.broadcast(message)
             
         except Exception as e:

@@ -27,6 +27,9 @@ RUN apt-get update && \
 # Copy VERSION file first (before backend/)
 COPY VERSION /app/VERSION
 
+# Copy diagnostic script
+COPY test_container_env.py /app/test_container_env.py
+
 # Install Python dependencies
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

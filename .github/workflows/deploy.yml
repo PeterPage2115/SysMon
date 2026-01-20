@@ -45,8 +45,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=peterpage2115/sysmon:buildcache
-          cache-to: type=registry,ref=peterpage2115/sysmon:buildcache,mode=max
+          no-cache: true  # Force full rebuild to ensure latest code
       
       - name: Image digest
         run: echo "Image pushed with digest ${{ steps.build.outputs.digest }}"

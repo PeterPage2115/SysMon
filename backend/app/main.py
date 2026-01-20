@@ -179,16 +179,41 @@ async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     
     try:
-        # Keep connection alive and handle incoming messages
+        # Send initial data immediately upon connection
+        stats = monitor.get_stats()
+        health_score = monitor.get_health_score(stats)
+        
+        with Session(engine) as session:
+            tamagotchi = session.exec(select(Tamagotchi)).first()
+            if tamagotchi:
+                tamagotchi.health = health_score
+                session.add(tamagotchi)
+                session.commit()
+                session.refresh(tamagotchi)
+                
+                initial_message = {
+                    "type": "stats_update",
+                    "stats": stats.model_dump(),
+                    "tamagotchi": {
+                        "name": tamagotchi.name,
+                        "level": tamagotchi.level,
+                        "xp": tamagotchi.xp,
+                        "health": tamagotchi.health,
+                        "happiness": tamagotchi.happiness
+                    }
+                }
+                await websocket.send_json(initial_message)
+        
+        # Keep connection alive - just wait for disconnect
         while True:
-            # Wait for client messages (ping/pong, commands, etc.)
-            data = await websocket.receive_text()
-            
-            # Echo back for testing
-            await manager.send_personal_message(
-                f"Message received: {data}",
-                websocket
-            )
+            try:
+                # Wait for client messages with a timeout
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
+                # Echo back for testing
+                await manager.send_personal_message(f"Message received: {data}", websocket)
+            except asyncio.TimeoutError:
+                # Send ping to keep connection alive
+                await websocket.send_json({"type": "ping"})
     
     except WebSocketDisconnect:
         manager.disconnect(websocket)

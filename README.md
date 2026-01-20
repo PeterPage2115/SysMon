@@ -1,6 +1,6 @@
 # SysMon - Server Tamagotchi 🖥️🐾
 
-![License](https://img.shields.io/github/license/PeterPage2115/SysMon?style=flat-square)
+![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 ![Python](https://img.shields.io/badge/python-3.11-blue?style=flat-square&logo=python&logoColor=white)
 ![Frontend](https://img.shields.io/badge/frontend-svelte-orange?style=flat-square&logo=svelte&logoColor=white)
 ![Docker](https://img.shields.io/badge/docker-ready-blue?style=flat-square&logo=docker&logoColor=white)

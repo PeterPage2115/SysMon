@@ -52,15 +52,15 @@ Fill in the following settings:
 In the "Extra Parameters" field, add:
 
 ```
---pid=host --label net.unraid.docker.webui='http://[IP]:[PORT:8000]' --label net.unraid.docker.icon='https://raw.githubusercontent.com/PeterPage2115/SysMon/main/icon.png'
+--pid=host
 ```
 
 ⚠️ **IMPORTANT**: Must have **two dashes** (`--pid=host`), not one dash (`-pid=host` or `pid-host` won't work!)
 
-**What these do:**
+**What this does:**
 - `--pid=host` - Allows seeing actual server CPU/RAM (not just container metrics)
-- `--label net.unraid.docker.webui` - Adds "WebUI" button in Unraid Docker tab
-- `--label net.unraid.docker.icon` - Shows SysMon icon in Unraid interface
+
+ℹ️ **Note**: WebUI and icon labels are now built into the Docker image, so you don't need to add them manually!
 
 #### **Environment Variables** (Optional)
 
@@ -87,8 +87,10 @@ Volume Mappings:
   /app/data → /mnt/user/appdata/sysmon (RW)
 
 Extra Parameters:
-  --pid=host --label net.unraid.docker.webui='http://[IP]:[PORT:8000]' --label net.unraid.docker.icon='https://raw.githubusercontent.com/PeterPage2115/SysMon/main/icon.png'
+  --pid=host
 ```
+
+ℹ️ **Labels are built-in**: The Docker image now includes WebUI and icon labels automatically - no manual configuration needed!
 
 ---
 
@@ -175,9 +177,18 @@ To update to the latest version:
 
 ### "Docker SDK unavailable" error in logs
 
-**Problem**: Cannot monitor Docker containers.
+**Problem**: Error message "Not supported URL scheme http+docker" or "Docker SDK unavailable".
 
-**Solution**: Ensure `/var/run/docker.sock` is mapped correctly with Read/Write access.
+**Solution**: 
+1. Ensure `/var/run/docker.sock` is mapped correctly with Read/Write access
+2. **Update to latest image**: This issue was fixed in recent versions
+   ```bash
+   docker stop sysmon
+   docker rm sysmon
+   docker pull peterpage2115/sysmon:latest
+   # Then recreate container with docker run
+   ```
+3. If using older images, the error is harmless - Docker monitoring simply won't work
 
 ### Database resets after container restart
 
@@ -207,6 +218,21 @@ To update to the latest version:
 1. Check container is running: `docker ps | grep sysmon`
 2. Check logs: `docker logs sysmon`
 3. Verify port is not used by another container (see "Port already in use" above)
+
+### WebUI button or icon not showing in Unraid
+
+**Problem**: The "WebUI" button or SysMon icon doesn't appear in Unraid Docker tab.
+
+**Solution**:
+1. **Update to latest image**: Labels are now built-in (no manual configuration needed)
+   ```bash
+   docker stop sysmon
+   docker rm sysmon
+   docker pull peterpage2115/sysmon:latest
+   # Then recreate container
+   ```
+2. **Force refresh Unraid UI**: Hard refresh your browser (Ctrl+F5)
+3. **Check labels are present**: Run `docker inspect sysmon | grep net.unraid` to verify labels
 
 ---
 

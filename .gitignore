@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+
+# SQLite
+*.db
+*.db-journal
+
+# Node
+node_modules/
+dist/
+.svelte-kit/
+build/
+
+# Environment
+.env
+.env.local
+
+# Data
+data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# GitHub Copilot
+.github/copilot-instructions.md
+
+# OS
+.DS_Store
+Thumbs.db

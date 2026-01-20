@@ -1,0 +1,23 @@
+services:
+  sysmon:
+    build: .
+    container_name: sysmon
+    # pid: host allows psutil to see host CPU/RAM, not just container stats
+    pid: host
+    ports:
+      - "8000:8000"  # FastAPI serves both API and static Svelte frontend
+    volumes:
+      # Docker SDK access for monitoring containers
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # SQLite database persistence (Tamagotchi state: name, level, XP)
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=sqlite:///./data/sysmon.db
+    restart: unless-stopped
+    networks:
+      - sysmon-network
+
+networks:
+  sysmon-network:
+    driver: bridge
